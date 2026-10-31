@@ -21,6 +21,7 @@ def parse_changelog_lines(lines: List[str]) -> List[Tuple[str, datetime]]:
     Parse changelog lines and extract (version, date) pairs.
     Returns a list of (version, datetime) tuples.
     Ignores lines that do not match known patterns.
+    Strips leading 'v' from version numbers for normalization.
     """
     results = []
     for line in lines:
@@ -29,6 +30,9 @@ def parse_changelog_lines(lines: List[str]) -> List[Tuple[str, datetime]]:
             m = pat.match(line)
             if m:
                 version = m.group(1)
+                # Remove leading 'v' if present
+                if version.startswith('v'):
+                    version = version[1:]
                 date_str = m.group(2)
                 dt = _parse_date(date_str)
                 if dt:
@@ -51,3 +55,9 @@ def parse_changelog_file(path: str) -> List[Tuple[str, datetime]]:
     with open(path, encoding="utf-8") as f:
         lines = f.readlines()
     return parse_changelog_lines(lines)
+
+def sort_releases_chronologically(releases: List[Tuple[str, datetime]]) -> List[Tuple[str, datetime]]:
+    """
+    Sort a list of (version, datetime) tuples chronologically by date.
+    """
+    return sorted(releases, key=lambda x: x[1])
